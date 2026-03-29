@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 export default async function handler(req, res) {
   const { channel } = req.query;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   // 1. LIVE SIGNAL FEED (News Ticker)
   if (channel === 'ticker') {
