@@ -336,8 +336,33 @@ const CopyPage = ({ setView }) => {
         // AI usually puts subject line as first text it generates if not wrapped in specific div
         // But our script might wrap it or it might just be the first thing in the string
         // Let's check for the emoji-started line
-        const subjectMatch = html.match(/^(?:[\u2700-\u27bf]|[\ud83c\udde6-\ud83c\uddfa]|[\ud83d\udc00-\ud83d\ude4f]|[\ud83d\ude80-\ud83d\udeff]|[\ud83e\udd00-\ud83e\uddff]|[\u2600-\u26ff]|[\u2300-\u23ff]).+?(?=\n|<div|<p)/i);
+        const subjectMatch = html.match(/^(?:[\u2700-\u27bf]|\ud83c[\udde6-\uddfa]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]|\ud83e[\udd00-\uddff]|[\u2600-\u26ff]|[\u2300-\u23ff]).+?(?=\n|<div|<p)/i);
         if (subjectMatch) subjectLine = subjectMatch[0].trim();
+    }
+
+    // Extraction: THE INSIGHT
+    let insight = "";
+    const insightSection = Array.from(
+      doc.querySelectorAll("h3, div, strong, h2"),
+    ).find((el) => {
+      const text = el.textContent.toLowerCase();
+      return (
+        text.includes("actionable insight") ||
+        text.includes("neural insight") ||
+        text.includes("interactive insight") ||
+        text.includes("intelligence pipeline")
+      );
+    });
+
+    if (insightSection) {
+      const nextP = insightSection.nextElementSibling;
+      if (nextP && nextP.tagName === "P") {
+        insight = getText(nextP);
+      } else {
+        const parent = insightSection.parentElement;
+        const pInside = parent?.querySelector("p");
+        if (pInside) insight = getText(pInside);
+      }
     }
 
     let out = "";
