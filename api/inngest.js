@@ -15,7 +15,7 @@ const sendIndividualIssue = inngest.createFunction(
   { id: "send-individual-issue", retries: 5 },
   { event: "signal/newsletter.send_single" },
   async ({ event, step }) => {
-    const { subscriber, content, dateStr } = event.data;
+    const { subscriber, content, dateStr, isoDate } = event.data;
     const appUrl = process.env.APP_URL || '';
     
     const fullHtml = getNewsletterHtml(subscriber, dateStr, content, appUrl);
@@ -27,6 +27,14 @@ const sendIndividualIssue = inngest.createFunction(
         `THE SIGNAL: ${subscriber.name}, Intelligence Protocol for ${dateStr}`, 
         fullHtml
       );
+    });
+
+    await step.run("update-subscriber-status", async () => {
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .update({ last_sent_date: isoDate }) 
+        .eq('email', subscriber.email);
+      if (error) throw error;
     });
 
     return { success: true, user: subscriber.email };
@@ -41,7 +49,7 @@ const newsletterDispatcher = inngest.createFunction(
   { id: "newsletter-dispatcher" },
   { event: "signal/newsletter.dispatch" },
   async ({ event, step }) => {
-    const { subscribers, content, dateStr, isPro = false } = event.data;
+    const { subscribers, content, dateStr, isoDate, isPro = false, forceSend = false } = event.data;
     
     // 1. Archive the Protocol (Persistence)
     // This allows the "Vault" and "Latest Issue" views on your site to update instantly
@@ -62,7 +70,9 @@ const newsletterDispatcher = inngest.createFunction(
       data: { 
         subscriber: sub, 
         content, 
-        dateStr
+        dateStr,
+        isoDate,
+        forceSend
       }
     }));
 

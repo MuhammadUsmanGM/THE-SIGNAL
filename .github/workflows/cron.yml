@@ -2,10 +2,10 @@ name: Weekly 3-2-1 Intelligence Trigger
 
 on:
   schedule:
-    # Run every 3 hours on Monday (8 times per day instead of 24)
-    # This covers all global timezones efficiently while reducing GitHub Action usage
-    # Times: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC
-    - cron: '0 */3 * * 1'
+    # Run every hour on Sunday and Monday
+    # This ensures 9:00 AM local time is caught for ALL timezones (Asia to Hawaii)
+    # 00:00 UTC Monday is already 1:00 PM in New Zealand, so we start on Sunday.
+    - cron: '0 * * * 0,1'
   workflow_dispatch: # Allows manual triggering
 
 jobs:

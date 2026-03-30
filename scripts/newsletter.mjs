@@ -229,7 +229,19 @@ async function sendNewsletter() {
   console.log('--- STARTING 3-2-1 WEEKLY INTELLIGENCE PROTOCOL ---');
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  
+  // 1. Calculate the 'Target Monday' for this week's issue.
+  // If it's Sunday (0), the target is tomorrow. If Monday (1), the target is today.
+  const targetMonday = new Date(now);
+  const dayOfWeek = now.getUTCDay();
+  if (dayOfWeek === 0) targetMonday.setUTCDate(now.getUTCDate() + 1);
+  else if (dayOfWeek !== 1 && !process.argv.includes('--force')) {
+    console.log('Not Monday or Sunday (UTC). Skipping scheduled run.');
+    return;
+  }
+
+  const dateStr = targetMonday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  const isoDate = targetMonday.toISOString().split('T')[0]; // YYYY-MM-DD
   const forceSend = process.argv && Array.isArray(process.argv) ? process.argv.includes('--force') : false;
 
   // 1. Check if we already have a generated briefing for this week in the vault
@@ -301,15 +313,15 @@ async function sendNewsletter() {
   // 4. Identify who needs the transmission in their specific window (Monday 9AM+)
   const qualifyingSubscribers = subscribers.filter(subscriber => {
     const localeOptions = { timeZone: subscriber.timezone, hour12: false };
-    const userFullDate = new Intl.DateTimeFormat('en-CA', { ...localeOptions, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
     const userDay = new Intl.DateTimeFormat('en-US', { ...localeOptions, weekday: 'long' }).format(now);
     const userHour = parseInt(new Intl.DateTimeFormat('en-US', { ...localeOptions, hour: 'numeric' }).format(now));
     
+    // Check if it's already Monday in their local time
     const isMonday = userDay === 'Monday';
     const is9AMOrLater = userHour >= 9;
-    const alreadySent = subscriber.last_sent_date === userFullDate;
+    const alreadySent = subscriber.last_sent_date === isoDate;
 
-    console.log(`[TARGET] ${subscriber.email} | Target: ${userDay} 09:00 | Current: ${userHour}:00 | Sent: ${alreadySent}`);
+    console.log(`[TARGET] ${subscriber.email} | Target: ${userDay} 09:00 | Current: ${userHour}:00 | Sent today: ${alreadySent}`);
     return (isMonday && is9AMOrLater && !alreadySent) || forceSend;
   });
 
@@ -333,7 +345,8 @@ async function sendNewsletter() {
       data: {
         subscribers: qualifyingSubscribers,
         content: sharedEmailBody,
-        dateStr: dateStr
+        dateStr: dateStr,
+        isoDate: isoDate
       }
     });
     console.log('[SUCCESS] Transmission dispatched to background worker.');
