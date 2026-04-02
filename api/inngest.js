@@ -63,7 +63,7 @@ const newsletterDispatcher = inngest.createFunction(
   { id: "newsletter-dispatcher" },
   { event: "signal/newsletter.dispatch" },
   async ({ event, step }) => {
-    const { subscribers, content, dateStr, isoDate, forceSend = false } = event.data;
+    const { subscribers, dateStr, isoDate, forceSend = false } = event.data;
     
     // 1. We fan out the sends as separate events without duplicating the large content payload.
     const events = subscribers.map(sub => ({

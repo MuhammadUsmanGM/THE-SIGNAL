@@ -344,7 +344,6 @@ async function sendNewsletter() {
       name: "signal/newsletter.dispatch",
       data: {
         subscribers: qualifyingSubscribers,
-        content: sharedEmailBody,
         dateStr: dateStr,
         isoDate: isoDate
       }
