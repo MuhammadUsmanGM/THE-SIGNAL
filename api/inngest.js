@@ -15,10 +15,24 @@ const sendIndividualIssue = inngest.createFunction(
   { id: "send-individual-issue", retries: 5 },
   { event: "signal/newsletter.send_single" },
   async ({ event, step }) => {
-    const { subscriber, content, dateStr, isoDate } = event.data;
+    const { subscriber, dateStr, isoDate } = event.data;
     const appUrl = process.env.APP_URL || '';
     
-    const fullHtml = getNewsletterHtml(subscriber, dateStr, content, appUrl);
+    const contentHtml = await step.run("fetch-content", async () => {
+      const { data, error } = await supabase
+        .from('newsletter_archive')
+        .select('raw_content')
+        .eq('week_date', dateStr)
+        .single();
+      if (error) throw error;
+      return data?.raw_content;
+    });
+
+    if (!contentHtml) {
+      throw new Error(`Content not found for date ${dateStr}`);
+    }
+
+    const fullHtml = getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl);
 
     await step.run("deliver-email", async () => {
       console.log(`[DELIVERY] Attempting send to ${subscriber.email}`);
@@ -51,12 +65,11 @@ const newsletterDispatcher = inngest.createFunction(
   async ({ event, step }) => {
     const { subscribers, content, dateStr, isoDate, forceSend = false } = event.data;
     
-    // 1. We fan out the sends as separate events.
+    // 1. We fan out the sends as separate events without duplicating the large content payload.
     const events = subscribers.map(sub => ({
       name: "signal/newsletter.send_single",
       data: { 
         subscriber: sub, 
-        content, 
         dateStr,
         isoDate,
         forceSend
