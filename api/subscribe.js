@@ -37,7 +37,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Failed security verification. Bot activity detected.' });
     }
   } catch (err) {
-    console.warn('Turnstile verification error:', err.message);
+    console.error('Turnstile verification error:', err.message);
+    return res.status(500).json({ error: 'Security verification failed due to a network error. Please try again.' });
   }
 
   try {
