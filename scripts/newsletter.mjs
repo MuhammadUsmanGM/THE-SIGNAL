@@ -299,11 +299,13 @@ async function sendNewsletter() {
 
         if (archiveError) {
           console.error('Failed to archive freshly generated newsletter:', archiveError);
+          sharedEmailBody = null; // Prevent dispatch without archived content
         } else {
           console.log('Signal archived successfully.');
         }
       } catch (archiveErr) {
         console.error('Archive storage exception:', archiveErr);
+        sharedEmailBody = null; // Prevent dispatch without archived content
       }
     }
   } else if (sharedEmailBody) {
