@@ -407,7 +407,7 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td width="30%" style="text-align:center;">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=happy"
+                    <a href="${appUrl}/api/track?channel=feedback&token=${subscriber.v_token || ''}&reaction=happy"
                        style="display:inline-block; padding:16px 24px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.3); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
                       &#x1F60D;
                     </a>
@@ -415,7 +415,7 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
                   </td>
                   <td width="5%">&nbsp;</td>
                   <td width="30%" style="text-align:center;">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=neutral"
+                    <a href="${appUrl}/api/track?channel=feedback&token=${subscriber.v_token || ''}&reaction=neutral"
                        style="display:inline-block; padding:16px 24px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
                       &#x1F610;
                     </a>
@@ -423,7 +423,7 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
                   </td>
                   <td width="5%">&nbsp;</td>
                   <td width="30%" style="text-align:center;">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=sad"
+                    <a href="${appUrl}/api/track?channel=feedback&token=${subscriber.v_token || ''}&reaction=sad"
                        style="display:inline-block; padding:16px 24px; background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.2); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
                       &#x1F61E;
                     </a>
