@@ -230,23 +230,44 @@ const CopyPage = ({ setView }) => {
   // NEW VERSION: updated template driven by issue id and new section formatting
   const formatForLinkedInV2 = (html) => {
     if (!html) return "";
+    // Prefer raw_content (pure AI output) over content_html (wrapped with greeting template)
+    const sourceHtml = issue?.raw_content || html;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+    const doc = parser.parseFromString(sourceHtml, "text/html");
 
     const getText = (el) =>
       el ? el.textContent.trim().replace(/\s+/g, " ") : "";
 
+    // Filter out junk entries that are template leaks or AI hallucinations
+    const isJunkEntry = (text) => {
+      if (!text) return true;
+      const junk = [
+        "WEEKLY_INTELLIGENCE_REPORT", "PERSONNEL_ID", "COM-000",
+        "GREETINGS", "ACTIVE NODE", "authenticated", "Read carefully"
+      ];
+      return junk.some(j => text.toUpperCase().includes(j));
+    };
+
+    const seenNames = new Set();
+    const isUniqueEntry = (name) => {
+      const key = name.toUpperCase().trim();
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    };
+
     const stories = [];
     Array.from(doc.querySelectorAll("h2")).forEach((h) => {
       const text = getText(h);
-      if (text && !text.toUpperCase().includes("MAJOR NEW STORIES")) {
+      if (text && !text.toUpperCase().includes("MAJOR NEW STORIES") && !isJunkEntry(text)) {
         const headline = text.toUpperCase();
+        if (!isUniqueEntry(headline)) return;
         const parent = h.parentElement;
         const p = parent?.querySelector("p") || h.nextElementSibling;
         const linkEl =
           parent?.querySelector("a") ||
           parent?.parentElement?.querySelector("a");
-        const summary = p ? getText(p) : "";
+        const summary = p && !isJunkEntry(getText(p)) ? getText(p) : "";
         const url =
           linkEl && linkEl.href && !linkEl.href.includes("localhost")
             ? linkEl.href
@@ -264,12 +285,12 @@ const CopyPage = ({ setView }) => {
       )
       .forEach((node) => {
         const name = getText(node.querySelector("strong"));
-        if (name && !name.includes("GADGET NAME")) {
+        if (name && !name.includes("GADGET NAME") && !isJunkEntry(name) && isUniqueEntry(name)) {
           const details = getText(node.querySelector("p"));
           const a = node.querySelector("a");
           const url =
             a && a.href && !a.href.includes("localhost") ? a.href : "";
-          gadgets.push({ name: name.toUpperCase(), details, url });
+          gadgets.push({ name: name.toUpperCase(), details: isJunkEntry(details) ? "" : details, url });
         }
       });
 
@@ -280,12 +301,12 @@ const CopyPage = ({ setView }) => {
       )
       .forEach((node) => {
         const name = getText(node.querySelector("strong"));
-        if (name && !name.includes("TOOL NAME")) {
+        if (name && !name.includes("TOOL NAME") && !isJunkEntry(name) && isUniqueEntry(name)) {
           const details = getText(node.querySelector("p"));
           const a = node.querySelector("a");
           const url =
             a && a.href && !a.href.includes("localhost") ? a.href : "";
-          tools.push({ name: name.toUpperCase(), details, url });
+          tools.push({ name: name.toUpperCase(), details: isJunkEntry(details) ? "" : details, url });
         }
       });
 
@@ -301,80 +322,79 @@ const CopyPage = ({ setView }) => {
         if (
           name &&
           !name.includes("PLACEHOLDER") &&
-          !name.includes("REPO NAME")
+          !name.includes("REPO NAME") &&
+          !isJunkEntry(name) &&
+          isUniqueEntry(name)
         ) {
           const details = getText(node.querySelector("p"));
           const a = node.querySelector("a");
           const url =
             a && a.href && !a.href.includes("localhost") ? a.href : "";
-          repos.push({ name: name.toUpperCase(), details, url });
+          repos.push({ name: name.toUpperCase(), details: isJunkEntry(details) ? "" : details, url });
         }
       });
 
     // Extraction: THE RADAR
     let radarSignal = "";
-    const radarSection = Array.from(doc.querySelectorAll("div")).find(d => 
+    const radarSection = Array.from(doc.querySelectorAll("div")).find(d =>
       d.textContent.includes("THE RADAR") && d.querySelector("h3")
     );
     if (radarSection) {
       const title = getText(radarSection.querySelector("h3"));
-      const details = getText(radarSection.querySelector("p"));
-      if (title) radarSignal = `⚡︎ ${title}\n${details}`;
+      const pEls = radarSection.querySelectorAll("p");
+      const details = Array.from(pEls).map(p => getText(p)).filter(t => t && !isJunkEntry(t) && !t.includes("UNDER THE RADAR")).join("\n");
+      if (title && !isJunkEntry(title)) radarSignal = `⚡︎ ${title}\n${details}`;
     }
 
     // Extraction: LEAD EDITOR INTRO
     let introText = "";
     const introSection = doc.querySelector('div[style*="border-bottom"] p');
     if (introSection) {
-      introText = getText(introSection);
+      const text = getText(introSection);
+      if (!isJunkEntry(text)) introText = text;
     }
 
-    // Extraction: SUBJECT LINE
-    let subjectLine = "";
-    const firstParagraph = doc.body.querySelector('p');
-    if (firstParagraph && firstParagraph.textContent.length < 150 && firstParagraph.textContent.includes(".")) {
-        // AI usually puts subject line as first text it generates if not wrapped in specific div
-        // But our script might wrap it or it might just be the first thing in the string
-        // Let's check for the emoji-started line
-        const subjectMatch = html.match(/^(?:[\u2700-\u27bf]|\ud83c[\udde6-\uddfa]|\ud83d[\udc00-\ude4f]|\ud83d[\ude80-\udeff]|\ud83e[\udd00-\uddff]|[\u2600-\u26ff]|[\u2300-\u23ff]).+?(?=\n|<div|<p)/i);
-        if (subjectMatch) subjectLine = subjectMatch[0].trim();
-    }
-
-    // Extraction: THE INSIGHT
+    // Extraction: CONTRARIAN INSIGHT (look for left-border quote block)
     let insight = "";
-    const insightSection = Array.from(
-      doc.querySelectorAll("h3, div, strong, h2"),
-    ).find((el) => {
-      const text = el.textContent.toLowerCase();
-      return (
-        text.includes("actionable insight") ||
-        text.includes("neural insight") ||
-        text.includes("interactive insight") ||
-        text.includes("intelligence pipeline")
-      );
+    const insightBlock = Array.from(doc.querySelectorAll("div")).find(d => {
+      const style = d.getAttribute("style") || "";
+      return style.includes("border-left") && style.includes("#10b981");
     });
-
-    if (insightSection) {
-      const nextP = insightSection.nextElementSibling;
-      if (nextP && nextP.tagName === "P") {
-        insight = getText(nextP);
-      } else {
-        const parent = insightSection.parentElement;
-        const pInside = parent?.querySelector("p");
-        if (pInside) insight = getText(pInside);
+    if (insightBlock) {
+      const pEls = insightBlock.querySelectorAll("p");
+      insight = Array.from(pEls).map(p => getText(p)).filter(t => t && !isJunkEntry(t)).join(" ");
+    }
+    // Fallback: search by heading text
+    if (!insight) {
+      const insightSection = Array.from(
+        doc.querySelectorAll("h3, div, strong, h2"),
+      ).find((el) => {
+        const text = el.textContent.toLowerCase();
+        return (
+          text.includes("contrarian") ||
+          text.includes("actionable insight") ||
+          text.includes("neural insight")
+        );
+      });
+      if (insightSection) {
+        const nextP = insightSection.nextElementSibling;
+        if (nextP && nextP.tagName === "P") {
+          insight = getText(nextP);
+        } else {
+          const parent = insightSection.parentElement;
+          const pInside = parent?.querySelector("p");
+          if (pInside) insight = getText(pInside);
+        }
       }
     }
 
     let out = "";
     const issueNum = issue && issue.id ? String(issue.id).padStart(2, "0") : "??";
-    
+
     // Header
     out += `◈ THE SIGNAL #${issueNum} | INTELLIGENCE PROTOCOL ◈\n`;
-    if (subjectLine) {
-      out += `Subject: ${subjectLine}\n`;
-    }
     out += `Precision intelligence for the AI elite.\n\n`;
-    
+
     if (introText) {
       out += `"${introText}"\n\n`;
     }
@@ -382,36 +402,44 @@ const CopyPage = ({ setView }) => {
     out += `Here is your 3-3-2-2-1-1 protocol for this week 👇\n\n`;
 
     // 01. Breakthroughs
-    out += `◈ 01. THE SIGNALS | MAJOR BREAKTHROUGHS\n`;
-    stories.forEach((s) => {
-      out += `▶ ${s.headline}\n${s.summary}\n`;
-      if (s.url) out += `🔗 Analysis: ${s.url}\n`;
+    if (stories.length > 0) {
+      out += `◈ 01. THE SIGNALS | MAJOR BREAKTHROUGHS\n`;
+      stories.forEach((s) => {
+        out += `\n▶ ${s.headline}\n${s.summary}\n`;
+        if (s.url) out += `🔗 Analysis: ${s.url}\n`;
+      });
       out += `\n`;
-    });
+    }
 
     // 02. Gadgets
-    out += `◈ 02. HARDWARE | GADGET PROTOCOL\n`;
-    gadgets.forEach((g) => {
-      out += `⚡︎ ${g.name}\n${g.details}\n`;
-      if (g.url) out += `🔗 Technical Specs: ${g.url}\n`;
+    if (gadgets.length > 0) {
+      out += `◈ 02. HARDWARE | GADGET PROTOCOL\n`;
+      gadgets.forEach((g) => {
+        out += `\n⚡︎ ${g.name}\n${g.details}\n`;
+        if (g.url) out += `🔗 Technical Specs: ${g.url}\n`;
+      });
       out += `\n`;
-    });
+    }
 
     // 03. Tools
-    out += `◈ 03. THE TOOLKIT | ELITE SYSTEMS\n`;
-    tools.forEach((t) => {
-      out += `⚙︎ ${t.name}\n${t.details}\n`;
-      if (t.url) out += `🔗 Protocol Access: ${t.url}\n`;
+    if (tools.length > 0) {
+      out += `◈ 03. THE TOOLKIT | ELITE SYSTEMS\n`;
+      tools.forEach((t) => {
+        out += `\n⚙︎ ${t.name}\n${t.details}\n`;
+        if (t.url) out += `🔗 Protocol Access: ${t.url}\n`;
+      });
       out += `\n`;
-    });
+    }
 
     // 04. Repos
-    out += `◈ 04. THE SOURCE | TRENDING REPOS\n`;
-    repos.forEach((r) => {
-      out += `❏ ${r.name}\n${r.details}\n`;
-      if (r.url) out += `🔗 Repository: ${r.url}\n`;
+    if (repos.length > 0) {
+      out += `◈ 04. THE SOURCE | TRENDING REPOS\n`;
+      repos.forEach((r) => {
+        out += `\n❏ ${r.name}\n${r.details}\n`;
+        if (r.url) out += `🔗 Repository: ${r.url}\n`;
+      });
       out += `\n`;
-    });
+    }
 
     // 05. Insight
     if (insight) {
@@ -424,7 +452,8 @@ const CopyPage = ({ setView }) => {
       out += `◈ 06. THE RADAR | EARLY WARNING\n`;
       out += `\n${radarSignal}\n\n`;
     }
-    // World-Class CTA Footer
+
+    // Footer
     out += `\nUntil next week — stay ahead of the signal.\n\n`;
     out += `📬 START RECEIVING THE SIGNAL\n`;
     out += `Join 1,000+ engineers getting the weekly briefing:\n`;
