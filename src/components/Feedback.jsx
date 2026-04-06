@@ -15,7 +15,16 @@ const Feedback = ({ setView }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const isPositive = params.get('status') === 'positive';
+  const reactionStatus = params.get('status');
+  const isPositive = reactionStatus === 'positive' || reactionStatus === 'fire';
+  const reactionConfig = {
+    happy: { emoji: '\u{1F60D}', message: "Glad you loved it! We'll keep the quality high." },
+    neutral: { emoji: '\u{1F610}', message: "Noted. We'll work on making the next one hit harder." },
+    sad: { emoji: '\u{1F61E}', message: "Understood. The signal will be recalibrated for future transmissions." },
+    positive: { emoji: '\u{1F60D}', message: "Excellent. The intelligence protocol is operating at peak efficiency." },
+    negative: { emoji: '\u{1F61E}', message: "Understood. The signal will be recalibrated for future transmissions." },
+  };
+  const currentReaction = reactionConfig[reactionStatus] || reactionConfig.neutral;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,27 +56,19 @@ const Feedback = ({ setView }) => {
       <div className="feedback-container fade-in">
         <div className="feedback-card" style={{ maxWidth: '500px', margin: '100px auto', textAlign: 'center' }}>
           <div style={{ padding: '60px 40px' }}>
-            <div style={{ 
-              background: isPositive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-              color: isPositive ? '#10b981' : '#ef4444', 
-              width: '80px', height: '80px', borderRadius: '50%', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px auto',
-              border: `1px solid ${isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
-            }}>
-              {isPositive ? <ShieldCheck size={40} /> : <Zap size={40} />}
+            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>
+              {currentReaction.emoji}
             </div>
-            <h2 style={{ color: '#fff', fontSize: '2.2rem', marginBottom: '15px', letterSpacing: '-1px' }}>Signal Authenticated</h2>
+            <h2 style={{ color: '#fff', fontSize: '2.2rem', marginBottom: '15px', letterSpacing: '-1px' }}>Thanks for the feedback</h2>
             <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '40px', lineHeight: '1.6' }}>
-              {isPositive 
-                ? "Excellent. The intelligence protocol is currently operating at peak efficiency." 
-                : "Understood. The signal will be recalibrated for future transmissions."}
+              {currentReaction.message}
             </p>
-            <button 
-              onClick={() => setView ? setView('home') : window.location.href = '/'} 
+            <button
+              onClick={() => setView ? setView('home') : window.location.href = '/'}
               className="secondary-btn"
               style={{ padding: '14px 28px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)' }}
             >
-              Return to Neutral State
+              Return Home
             </button>
           </div>
         </div>

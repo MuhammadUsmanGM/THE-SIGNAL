@@ -33,18 +33,25 @@ export default async function handler(req, res) {
     return res.end(pixel);
   }
 
-  // 2. USER FEEDBACK SIGNALS (1-Click Polls)
+  // 2. USER FEEDBACK SIGNALS (Emoji Reactions)
   if (channel === 'feedback') {
+    const { reaction } = req.query;
+    const validReactions = ['happy', 'neutral', 'sad'];
+    const reactionType = validReactions.includes(reaction) ? reaction : 'neutral';
+
     if (token) {
         try {
             await supabase
                 .from('newsletter_subscribers')
                 .update({ last_active_at: new Date().toISOString() })
                 .eq('v_token', token);
+
+            await supabase
+                .from('newsletter_reactions')
+                .insert({ subscriber_token: token, reaction: reactionType, issue_date: new Date().toISOString().split('T')[0] });
         } catch (err) { console.error('Feedback Error:', err.message); }
     }
-    const status = useful === 'true' ? 'positive' : 'negative';
-    return res.redirect(`${process.env.APP_URL}/?view=feedback&status=${status}`);
+    return res.redirect(`${process.env.APP_URL}/?view=feedback&status=${reactionType}`);
   }
 
   return res.status(404).json({ error: 'Signal channel not found.' });

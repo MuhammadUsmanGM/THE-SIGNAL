@@ -124,7 +124,7 @@ const Commander = ({ setView }) => {
     );
   }
 
-  const { totalSubscribers, verifiedNodes, pendingNodes, growthLast7Days, latestIssue, timezoneDistribution, totalOpens, activeNodes } = stats.stats;
+  const { totalSubscribers, verifiedNodes, pendingNodes, growthLast7Days, latestIssue, timezoneDistribution, totalOpens, activeNodes, reactionCounts = { happy: 0, neutral: 0, sad: 0 } } = stats.stats;
   const engagementRate = totalSubscribers > 0 ? Math.round((activeNodes / totalSubscribers) * 100) : 0;
 
   return (
@@ -151,8 +151,35 @@ const Commander = ({ setView }) => {
           <StatCard title="Latest Issue" value={latestIssue} icon={<Shield size={20} />} color="#ef4444" />
         </div>
 
+        {/* Feedback Pulse */}
+        <div className="glass-card" style={{ padding: '30px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', marginBottom: '40px' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Zap size={18} color="#ef4444" /> Feedback Pulse
+          </h3>
+          {(() => {
+            const totalReactions = reactionCounts.happy + reactionCounts.neutral + reactionCounts.sad;
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[
+                  { emoji: '\u{1F60D}', label: 'Loved it', count: reactionCounts.happy, color: '#10b981' },
+                  { emoji: '\u{1F610}', label: 'It was ok', count: reactionCounts.neutral, color: '#f59e0b' },
+                  { emoji: '\u{1F61E}', label: 'Not great', count: reactionCounts.sad, color: '#ef4444' },
+                ].map((r, i) => (
+                  <div key={i} style={{ textAlign: 'center', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{r.emoji}</div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff', marginBottom: '4px' }}>{r.count}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>{r.label}</div>
+                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ width: totalReactions > 0 ? `${(r.count / totalReactions) * 100}%` : '0%', height: '100%', background: r.color, borderRadius: '2px' }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '40px' }}>
-          {/* Timezone Map Placeholder */}
           <div className="glass-card" style={{ padding: '30px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                <Globe size={18} color="#ef4444" /> Node Distribution

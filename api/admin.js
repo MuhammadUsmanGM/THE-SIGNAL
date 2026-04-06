@@ -51,6 +51,18 @@ export default async function handler(req, res) {
         .limit(1)
         .maybeSingle();
 
+      // 5. Fetch Reaction Stats
+      const { data: reactions } = await supabase
+        .from('newsletter_reactions')
+        .select('reaction');
+
+      const reactionCounts = { happy: 0, neutral: 0, sad: 0 };
+      if (reactions) {
+        reactions.forEach(r => {
+          if (reactionCounts.hasOwnProperty(r.reaction)) reactionCounts[r.reaction]++;
+        });
+      }
+
       return res.status(200).json({
         stats: {
             totalSubscribers,
@@ -60,7 +72,8 @@ export default async function handler(req, res) {
             latestIssue: latestArchive?.week_date || 'N/A',
             timezoneDistribution,
             totalOpens,
-            activeNodes
+            activeNodes,
+            reactionCounts
         },
         rawNodes: allSubscribers.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 20)
       });

@@ -406,21 +406,36 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
 
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td width="48%">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&useful=true"
-                       style="display:block; padding:12px; background:rgba(16,185,129,0.05); border:1px solid #10b981; border-radius:8px; color:#10b981; text-align:center; font-weight:700; font-size:12px; text-decoration:none; text-transform:uppercase; letter-spacing:1px;">
-                      Worth My Time
+                  <td width="30%" style="text-align:center;">
+                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=happy"
+                       style="display:inline-block; padding:16px 24px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.3); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
+                      &#x1F60D;
                     </a>
+                    <p style="margin:8px 0 0 0; font-size:10px; color:#10b981; font-weight:700; letter-spacing:1px;">LOVED IT</p>
                   </td>
-                  <td width="4%">&nbsp;</td>
-                  <td width="48%">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&useful=false"
-                       style="display:block; padding:12px; background:rgba(239,68,68,0.05); border:1px solid #ef4444; border-radius:8px; color:#ef4444; text-align:center; font-weight:700; font-size:12px; text-decoration:none; text-transform:uppercase; letter-spacing:1px;">
-                      Needs Improvement
+                  <td width="5%">&nbsp;</td>
+                  <td width="30%" style="text-align:center;">
+                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=neutral"
+                       style="display:inline-block; padding:16px 24px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
+                      &#x1F610;
                     </a>
+                    <p style="margin:8px 0 0 0; font-size:10px; color:#94a3b8; font-weight:700; letter-spacing:1px;">IT WAS OK</p>
+                  </td>
+                  <td width="5%">&nbsp;</td>
+                  <td width="30%" style="text-align:center;">
+                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&reaction=sad"
+                       style="display:inline-block; padding:16px 24px; background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.2); border-radius:12px; text-decoration:none; font-size:28px; line-height:1;">
+                      &#x1F61E;
+                    </a>
+                    <p style="margin:8px 0 0 0; font-size:10px; color:#ef4444; font-weight:700; letter-spacing:1px;">NOT GREAT</p>
                   </td>
                 </tr>
               </table>
+
+              <p style="margin:24px 0 0 0; font-size:13px; color:#64748b;">
+                Want to share more?
+                <a href="${appUrl}/?view=feedback" style="color:#10b981; text-decoration:none; font-weight:700;"> Tell us what you think &rarr;</a>
+              </p>
 
             </td>
           </tr>
