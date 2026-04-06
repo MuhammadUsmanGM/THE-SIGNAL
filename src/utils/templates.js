@@ -311,6 +311,25 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
 
 
     <!-- ═══════════════════════════════
+         MAIN CONTENT
+    ════════════════════════════════ -->
+    <tr>
+      <td class="pad-t">
+        <p class="mono section-label">// THIS_WEEKS_SIGNALS</p>
+
+        <!-- content block wrapper -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td style="color:#cbd5e1;font-size:15px;line-height:1.8;">
+              ${contentHtml}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+
+    <!-- ═══════════════════════════════
          ISSUE STATS BAR
     ════════════════════════════════ -->
     <tr>
@@ -324,7 +343,7 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
             </td>
             <td class="stat-cell" style="padding:15px 5px;border-right:1px solid #1e293b;width:25%;">
               <p class="mono" style="margin:0 0 2px 0;font-size:20px;color:#10b981;">3</p>
-              <p class="mono" style="margin:0;font-size:8px;color:#475569;letter-spacing:1px;">GADGETS</p>
+              <p class="mono" style="margin:0;font-size:8px;color:#475569;letter-spacing:1px;">TOOLS</p>
             </td>
             <td class="stat-cell" style="padding:15px 5px;border-right:1px solid #1e293b;width:25%;">
               <p class="mono" style="margin:0 0 2px 0;font-size:20px;color:#10b981;">2+2</p>
@@ -333,25 +352,6 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
             <td class="stat-cell" style="padding:15px 5px;width:25%;">
               <p class="mono" style="margin:0 0 2px 0;font-size:20px;color:#10b981;">1</p>
               <p class="mono" style="margin:0;font-size:8px;color:#475569;letter-spacing:1px;">INSIGHT</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-
-    <!-- ═══════════════════════════════
-         MAIN CONTENT
-    ════════════════════════════════ -->
-    <tr>
-      <td class="pad-t">
-        <p class="mono section-label">// THIS_WEEKS_SIGNALS</p>
-
-        <!-- content block wrapper -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-          <tr>
-            <td style="color:#cbd5e1;font-size:15px;line-height:1.8;">
-              ${contentHtml}
             </td>
           </tr>
         </table>
@@ -407,11 +407,16 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td width="48%">
+                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&useful=true"
+                       style="display:block; padding:12px; background:rgba(16,185,129,0.05); border:1px solid #10b981; border-radius:8px; color:#10b981; text-align:center; font-weight:700; font-size:12px; text-decoration:none; text-transform:uppercase; letter-spacing:1px;">
+                      Worth My Time
+                    </a>
+                  </td>
                   <td width="4%">&nbsp;</td>
                   <td width="48%">
-                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&useful=false" 
+                    <a href="${appUrl}/api/track/feedback?token=${subscriber.v_token || ''}&useful=false"
                        style="display:block; padding:12px; background:rgba(239,68,68,0.05); border:1px solid #ef4444; border-radius:8px; color:#ef4444; text-align:center; font-weight:700; font-size:12px; text-decoration:none; text-transform:uppercase; letter-spacing:1px;">
-                      [ NO ]  NEGATIVE_SIGNAL
+                      Needs Improvement
                     </a>
                   </td>
                 </tr>
