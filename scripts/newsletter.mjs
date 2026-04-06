@@ -213,6 +213,15 @@ async function generateWeeklyIntelligence(intelligenceData) {
          </div>
 
     
+    CRITICAL RULES:
+    - NEVER repeat the same item across different sections. Each article, gadget, repo must appear in ONLY ONE section.
+    - NEVER use a repo name (like "openlaw/openlaw") as a story, gadget, or tool entry. Repos go ONLY in the Trending Repos section.
+    - NEVER include the report header, date, or personnel ID inside the content sections — that wrapper is added separately.
+    - NEVER include the lead editor intro text as a content item in any section.
+    - Each section must have EXACTLY the number of items specified (3 stories, 3 tools, 2 gadgets, 2 repos, 1 contrarian, 1 radar).
+    - Stories come from STORIES source only. Gadgets come from GADGETS source only. Repos come from REPOS source only.
+    - If a GADGETS source has fewer than 2 AI-relevant items, skip non-AI items rather than filling with repos or stories.
+
     Technical: Return ONLY the HTML content. No markdown. Inline styles only.
   `;
 
