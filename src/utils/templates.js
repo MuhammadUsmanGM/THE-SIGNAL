@@ -56,7 +56,6 @@ export function getNewsletterBodyHtml(subscriber, dateStr, contentHtml) {
  */
 export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
   const unsubscribeUrl = `${appUrl}/?unsubscribe=true&token=${subscriber.v_token || ''}`;
-  const bodyContent = getNewsletterBodyHtml(subscriber, dateStr, contentHtml);
   
   return `
 <!DOCTYPE html>
@@ -291,11 +290,17 @@ export function getNewsletterHtml(subscriber, dateStr, contentHtml, appUrl) {
 
 
     <!-- ═══════════════════════════════
-         BRIEFING CONTENT
+         BRIEFING GREETING
     ════════════════════════════════ -->
     <tr>
-      <td style="background-color: #020617;">
-        ${bodyContent}
+      <td class="pad" style="background-color: #020617;">
+        <p style="font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 3px; color: #10b981; text-transform: uppercase; margin: 0 0 20px 0;">
+          // WEEKLY_INTELLIGENCE_REPORT :: ${dateStr} :: PERSONNEL_ID: ${subscriber.name ? subscriber.name.toUpperCase().substring(0, 3) : 'COM'}-${(subscriber.id || '000').toString().padStart(3, '0')}
+        </p>
+        <div style="margin-bottom: 30px; border-left: 2px solid #10b981; padding-left: 20px;">
+          <h2 style="color: #fff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Greetings, ${subscriber.created_at ? getPersonnelRank(subscriber.created_at) : 'Active Node'} ${subscriber.name || 'Commander'}.</h2>
+          <p style="margin: 5px 0 0 0; font-size: 14px; color: #94a3b8; opacity: 0.8;">Your personal intelligence briefing is authenticated. Read carefully.</p>
+        </div>
       </td>
     </tr>
 
