@@ -51,7 +51,20 @@ export default async function handler(req, res) {
                 .insert({ subscriber_token: token, reaction: reactionType, issue_date: new Date().toISOString().split('T')[0] });
         } catch (err) { console.error('Feedback Error:', err.message); }
     }
-    return res.redirect(`${process.env.APP_URL}/?view=feedback&status=${reactionType}`);
+    const emojiMap = { happy: '😍', neutral: '😐', sad: '😞' };
+    const messageMap = { happy: "Glad you loved it!", neutral: "Noted — we'll do better.", sad: "We'll recalibrate." };
+    return res.setHeader('Content-Type', 'text/html').send(`
+      <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>Thanks!</title></head>
+      <body style="margin:0;background:#020617;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;">
+        <div style="text-align:center;padding:40px;">
+          <div style="font-size:4rem;margin-bottom:16px;">${emojiMap[reactionType]}</div>
+          <h2 style="color:#fff;margin:0 0 8px 0;font-size:1.5rem;">Thanks for the feedback</h2>
+          <p style="color:#94a3b8;margin:0 0 24px 0;">${messageMap[reactionType]}</p>
+          <a href="${process.env.APP_URL}" style="color:#10b981;text-decoration:none;font-weight:700;">← Back to The Signal</a>
+        </div>
+      </body></html>
+    `);
   }
 
   return res.status(404).json({ error: 'Signal channel not found.' });
