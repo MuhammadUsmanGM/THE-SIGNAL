@@ -94,7 +94,7 @@ function App() {
       }
       setCurrentView('dashboard');
       setShowWelcome(false); 
-    } else if (viewParam === 'feedback') {
+    } else if (viewParam === 'feedback' || params.get('status')) {
       setCurrentView('feedback');
       setShowWelcome(false);
     } else if (viewParam === 'latest') {

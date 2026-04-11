@@ -18,11 +18,23 @@ const Feedback = ({ setView }) => {
   const reactionStatus = params.get('status');
   const isPositive = reactionStatus === 'positive' || reactionStatus === 'fire';
   const reactionConfig = {
-    happy: { emoji: '\u{1F60D}', message: "Glad you loved it! We'll keep the quality high." },
-    neutral: { emoji: '\u{1F610}', message: "Noted. We'll work on making the next one hit harder." },
-    sad: { emoji: '\u{1F61E}', message: "Understood. The signal will be recalibrated for future transmissions." },
-    positive: { emoji: '\u{1F60D}', message: "Excellent. The intelligence protocol is operating at peak efficiency." },
-    negative: { emoji: '\u{1F61E}', message: "Understood. The signal will be recalibrated for future transmissions." },
+    happy: { 
+      emoji: '\u{1F60D}', 
+      title: "You're Awesome!",
+      message: "Thrilled you loved this week's signal. We really appreciate your loyalty to the protocol — it's what keeps the engine running." 
+    },
+    neutral: { 
+      emoji: '\u{1F610}', 
+      title: "Thanks for the honesty",
+      message: "We hear you. This one didn't quite hit the target. We're already recalibrating the signal for next week's transmission." 
+    },
+    sad: { 
+      emoji: '\u{1F61E}', 
+      title: "We'll do better",
+      message: "This wasn't up to the standard you deserve. We've logged this deficiency and are prioritizing improvements immediately." 
+    },
+    positive: { emoji: '\u{1F60D}', title: "Excellent", message: "The intelligence protocol is operating at peak efficiency. Signal strength is maximum." },
+    negative: { emoji: '\u{1F61E}', title: "Signal Degraded", message: "Transmission errors detected. We will recalibrate for future transmissions." },
   };
   const currentReaction = reactionConfig[reactionStatus] || reactionConfig.neutral;
 
@@ -59,10 +71,23 @@ const Feedback = ({ setView }) => {
             <div style={{ fontSize: '4rem', marginBottom: '20px' }}>
               {currentReaction.emoji}
             </div>
-            <h2 style={{ color: '#fff', fontSize: '2.2rem', marginBottom: '15px', letterSpacing: '-1px' }}>Thanks for the feedback</h2>
+            <h2 style={{ color: '#fff', fontSize: '2.2rem', marginBottom: '15px', letterSpacing: '-1px' }}>{currentReaction.title}</h2>
             <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '40px', lineHeight: '1.6' }}>
               {currentReaction.message}
             </p>
+            
+            <div style={{ margin: '40px 0', padding: '30px', background: 'rgba(16, 185, 129, 0.03)', border: '1px solid rgba(16, 185, 129, 0.1)', borderRadius: '16px' }}>
+              <h3 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '10px' }}>Have any improvements in mind?</h3>
+              <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>Your insight helps refine the protocol for everyone.</p>
+              <button
+                onClick={() => setView('feedback')}
+                className="submit-btn"
+                style={{ width: 'auto', padding: '12px 24px', fontSize: '0.9rem' }}
+              >
+                Share Feedback →
+              </button>
+            </div>
+
             <button
               onClick={() => setView ? setView('home') : window.location.href = '/'}
               className="secondary-btn"
