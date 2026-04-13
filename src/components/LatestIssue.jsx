@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import logo from '../assets/Favicon.webp';
-import './Feedback.css'; // Reuse premium styles for content
-import './Welcome.css';  // Reuse loading styles
 import { Share2, Zap, ArrowLeft } from 'lucide-react';
 import AudioSynthesis from './AudioSynthesis';
 import { useNeuralTheme } from '../context/ThemeContext';
+import './Feedback.css'; // Reuse premium styles for content
+import './LatestIssue.css';
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -115,9 +115,9 @@ const LatestIssue = ({ issueId = null, setView }) => {
 
   return (
     <div className="feedback-container">
-      <div className="feedback-card" style={{ maxWidth: '800px', width: '100%', border: `1px solid ${currentTheme.color}22` }}>
+      <div className="feedback-card issue-card" style={{ border: `1px solid ${currentTheme.color}22` }}>
         {/* Header */}
-        <div className="feedback-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="feedback-header issue-header">
           <div>
             <div className="feedback-badge" style={{ background: `${currentTheme.color}11`, color: currentTheme.color, borderColor: `${currentTheme.color}33` }}>
               {issueId ? `Protocol Record #${issueId}` : 'Latest Protocol Release'}
@@ -125,23 +125,14 @@ const LatestIssue = ({ issueId = null, setView }) => {
             <h1 className="feedback-title">THE SIGNAL.</h1>
             <p className="feedback-subtitle" style={{ color: currentTheme.color }}>{issue.week_date}</p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="issue-actions">
             <button 
               onClick={handleShare}
-              className="secondary-btn"
+              className="share-btn"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
                 background: copied ? `${currentTheme.color}11` : 'rgba(255, 255, 255, 0.05)',
                 border: `1px solid ${copied ? currentTheme.color : 'rgba(255, 255, 255, 0.1)'}`,
                 color: copied ? currentTheme.color : '#94a3b8',
-                borderRadius: '10px',
-                fontSize: '0.8rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
               }}
             >
               <Share2 size={14} />
@@ -163,24 +154,19 @@ const LatestIssue = ({ issueId = null, setView }) => {
 
           {/* Actionable Prompt Playground Access */}
           {currentPrompt && (
-            <div style={{ 
-              marginTop: '40px',
-              marginBottom: '30px', 
-              padding: '24px', 
-              background: `${currentTheme.color}08`, 
-              border: `1px solid ${currentTheme.color}33`, 
-              borderRadius: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '20px',
-              boxShadow: `0 10px 30px -10px ${currentTheme.color}22`
-            }}>
+            <div 
+              className="playground-container"
+              style={{ 
+                background: `${currentTheme.color}08`, 
+                border: `1px solid ${currentTheme.color}33`, 
+                boxShadow: `0 10px 30px -10px ${currentTheme.color}22`
+              }}
+            >
               <div>
-                <div style={{ color: currentTheme.color, fontWeight: '800', fontSize: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                <div className="playground-label" style={{ color: currentTheme.color }}>
                   Interactive Insight Pipeline
                 </div>
-                <div style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: '600' }}>
+                <div className="playground-title">
                   Execute this week's neural protocol in the side-sandbox.
                 </div>
               </div>
@@ -194,9 +180,9 @@ const LatestIssue = ({ issueId = null, setView }) => {
             </div>
           )}
           
-          <div style={{ marginTop: '60px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
+          <div className="issue-footer">
             <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>{issueId ? 'Interested in future signals?' : 'Want this delivered to your inbox?'}</p>
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="issue-footer-btns">
               <button onClick={() => setView('home')} className="submit-btn" style={{ textDecoration: 'none', display: 'inline-flex', width: 'auto', padding: '12px 30px', background: currentTheme.color }}>
                 Subscribe to Protocol
               </button>

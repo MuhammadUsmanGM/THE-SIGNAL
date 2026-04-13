@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Lock, ShieldAlert, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import logo from '../assets/Favicon.webp';
 import './Feedback.css';
-import './Welcome.css';
+import './ArchiveExplorer.css';
 
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -103,7 +103,7 @@ const ArchiveExplorer = ({ setView, setSelectedIssueId, email }) => {
 
   return (
     <div className="feedback-container fade-in">
-      <div className="feedback-card" style={{ maxWidth: '900px', width: '100%', borderTop: '4px solid #10b981' }}>
+      <div className="feedback-card archive-card">
         <div className="feedback-header">
           <div className="feedback-badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>Intelligence Archive</div>
           <h1 className="feedback-title" style={{ letterSpacing: '-2px' }}>DATA_VAULT_v3.0.</h1>
@@ -111,7 +111,7 @@ const ArchiveExplorer = ({ setView, setSelectedIssueId, email }) => {
         </div>
 
         <div className="feedback-form">
-          <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: '1fr' }}>
+          <div className="archive-grid">
             {archives.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <p style={{ color: '#94a3b8' }}>Archive is currently empty. Initializing first signal capture sequence.</p>
@@ -120,10 +120,13 @@ const ArchiveExplorer = ({ setView, setSelectedIssueId, email }) => {
               archives.map((item, index) => {
                 const unlocked = canAccess(item, index);
                 const isPro = item.is_pro;
+                
+                const itemTypeClass = !unlocked ? 'locked' : (isPro ? 'pro' : 'public');
 
                 return (
                   <div 
                     key={item.id} 
+                    className={`archive-item archive-item--${itemTypeClass}`}
                     onClick={() => {
                       if (!unlocked) {
                           setView('omegawall');
@@ -133,65 +136,40 @@ const ArchiveExplorer = ({ setView, setSelectedIssueId, email }) => {
                       if (setSelectedIssueId) setSelectedIssueId(item.id);
                       setView('issue');
                     }}
-                    style={{ 
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '24px',
+                    style={{
                       background: !unlocked ? 'rgba(239, 68, 68, 0.02)' : (isPro ? 'rgba(139, 92, 246, 0.03)' : 'rgba(16, 185, 129, 0.03)'),
                       border: `1px solid ${!unlocked ? 'rgba(239, 68, 68, 0.1)' : (isPro ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)')}`,
-                      borderRadius: '20px',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = !unlocked ? 'rgba(239, 68, 68, 0.05)' : (isPro ? 'rgba(139, 92, 246, 0.08)' : 'rgba(16, 185, 129, 0.05)');
-                      e.currentTarget.style.borderColor = !unlocked ? 'rgba(239, 68, 68, 0.2)' : (isPro ? 'rgba(139, 92, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)');
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = !unlocked ? 'rgba(239, 68, 68, 0.02)' : (isPro ? 'rgba(139, 92, 246, 0.03)' : 'rgba(16, 185, 129, 0.03)');
-                      e.currentTarget.style.borderColor = !unlocked ? 'rgba(239, 68, 68, 0.1)' : (isPro ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)');
-                      e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <div style={{ 
-                        width: '60px', 
-                        height: '60px', 
+                    <div className="archive-item-content">
+                      <div className="archive-item-icon" style={{
                         background: !unlocked ? 'rgba(239, 68, 68, 0.1)' : (isPro ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)'), 
-                        borderRadius: '16px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
                         color: !unlocked ? '#ef4444' : (isPro ? '#8b5cf6' : '#10b981'),
                         border: `1px solid ${!unlocked ? 'rgba(239, 68, 68, 0.2)' : (isPro ? 'rgba(139, 92, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)')}`,
-                        fontWeight: '800'
                       }}>
                         {!unlocked ? <Lock size={20} /> : (isPro ? <Zap size={20} /> : <ShieldCheck size={20} />)}
                       </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <div className="archive-item-info">
+                        <div className="archive-item-status-tags">
                           {!unlocked ? (
                             <>
-                              <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '2px' }}>RESTRICTED</div>
-                              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '800' }}>INVITE 3 NODES OR WAIT {index + 1} WEEKS</span>
+                              <div className="archive-item-badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>RESTRICTED</div>
+                              <span className="archive-item-subtitle">INVITE 3 NODES OR WAIT {index + 1} WEEKS</span>
                             </>
                           ) : (
                             <>
-                              <div style={{ background: isPro ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: isPro ? '#8b5cf6' : '#10b981', fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                              <div className="archive-item-badge" style={{ background: isPro ? 'rgba(139, 92, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: isPro ? '#8b5cf6' : '#10b981' }}>
                                 {isPro ? 'PREMIUM SIGNAL' : 'PUBLIC ACCESS'}
                               </div>
-                              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '800' }}>DECRYPTION_SUCCESSFUL</span>
+                              <span className="archive-item-subtitle">DECRYPTION_SUCCESSFUL</span>
                             </>
                           )}
                         </div>
-                        <h3 style={{ color: '#ffffff', margin: 0, fontSize: '1.25rem', fontWeight: '700' }}>{item.week_date}</h3>
-                        <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.85rem' }}>Decrypted on: {new Date(item.created_at).toLocaleDateString()}</p>
+                        <h3 className="archive-item-title">{item.week_date}</h3>
+                        <p className="archive-item-date">Decrypted on: {new Date(item.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    <div style={{ color: !unlocked ? '#ef4444' : (isPro ? '#8b5cf6' : '#10b981'), fontWeight: '800', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="archive-item-action" style={{ color: !unlocked ? '#ef4444' : (isPro ? '#8b5cf6' : '#10b981') }}>
                       {!unlocked ? 'Protocol Locked' : 'Access Signal'} <ArrowRight size={16} />
                     </div>
                   </div>

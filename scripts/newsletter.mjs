@@ -264,13 +264,17 @@ async function sendNewsletter() {
   try {
     const { data: cachedArchive, error: checkError } = await supabase
       .from('newsletter_archive')
-      .select('content_html')
+      .select('content_html, raw_content')
       .eq('week_date', dateStr)
       .maybeSingle();
 
-    if (cachedArchive) {
+    if (cachedArchive && cachedArchive.raw_content) {
       console.log('--- CACHE HIT: REUSING ARCHIVED NEURAL BRIEFING ---');
       sharedEmailBody = cachedArchive.content_html;
+    } else if (cachedArchive && !cachedArchive.raw_content) {
+      console.log('--- CACHE INCOMPLETE: raw_content missing, will regenerate ---');
+      // Delete the incomplete row so we can regenerate
+      await supabase.from('newsletter_archive').delete().eq('week_date', dateStr);
     }
   } catch (err) {
     console.warn('Cache check failed, will proceed with generation if needed:', err.message);

@@ -1,0 +1,152 @@
+
+.archive-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+}
+
+.archive-item {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.archive-item-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.archive-item-icon {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.archive-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.archive-item-status-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.archive-item-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.archive-item-subtitle {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.archive-item-title {
+  color: #ffffff;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.archive-item-date {
+  color: #64748b;
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+}
+
+.archive-item-action {
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Custom Overrides for Archive Explorer */
+.archive-card {
+  max-width: 900px !important;
+  border-top: 4px solid #10b981 !important;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .archive-item {
+    align-items: flex-start;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .archive-item {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .archive-item-content {
+    gap: 16px;
+  }
+
+  .archive-item-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+  }
+
+  .archive-item-title {
+    font-size: 1.1rem;
+  }
+
+  .archive-item-action {
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .archive-item-status-tags {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .archive-item-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .archive-item-icon {
+    margin-bottom: 4px;
+  }
+  
+  .archive-item-info {
+    width: 100%;
+  }
+
+  .archive-item-action {
+    font-size: 0.75rem;
+  }
+}

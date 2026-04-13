@@ -1,0 +1,102 @@
+
+.issue-card {
+  max-width: 800px !important;
+  width: 100%;
+}
+
+.issue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.issue-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.playground-container {
+  margin-top: 40px;
+  margin-bottom: 30px;
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.playground-label {
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.playground-title {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.issue-footer {
+  margin-top: 60px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 40px;
+}
+
+.issue-footer-btns {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive Styles for LatestIssue */
+@media (max-width: 640px) {
+  .issue-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .issue-actions {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .playground-container {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .playground-container button {
+    width: 100%;
+  }
+
+  .issue-footer-btns {
+    flex-direction: column;
+  }
+
+  .issue-footer-btns button {
+    width: 100% !important;
+  }
+}
