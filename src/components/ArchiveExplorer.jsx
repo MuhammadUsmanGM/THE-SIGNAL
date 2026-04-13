@@ -132,9 +132,8 @@ const ArchiveExplorer = ({ setView, setSelectedIssueId, email }) => {
                           setView('omegawall');
                           return;
                       }
-                      window.history.pushState({}, '', `/?view=issue&id=${item.id}`);
                       if (setSelectedIssueId) setSelectedIssueId(item.id);
-                      setView('issue');
+                      setView('issue', { id: item.id });
                     }}
                     style={{
                       background: !unlocked ? 'rgba(239, 68, 68, 0.02)' : (isPro ? 'rgba(139, 92, 246, 0.03)' : 'rgba(16, 185, 129, 0.03)'),

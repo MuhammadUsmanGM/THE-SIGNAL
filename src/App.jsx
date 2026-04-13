@@ -44,6 +44,96 @@ function App() {
 
   const { calculateTheme } = useNeuralTheme();
 
+  const syncViewWithUrl = (isPopState = false) => {
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    const verifiedStatus = params.get('verified');
+    const refParam = params.get('ref');
+    const unsubscribeEmail = params.get('email');
+    const unsubscribeToken = params.get('token');
+    const isUnsubscribeAction = params.get('unsubscribe') === 'true';
+    const statusParam = params.get('status');
+    const idParam = params.get('id');
+
+    if (refParam) {
+      setReferrerToken(refParam);
+    }
+
+    if (verifiedStatus) {
+      setCurrentView('verification');
+      setShowWelcome(false);
+      return;
+    }
+
+    if (isUnsubscribeAction && (unsubscribeEmail || unsubscribeToken)) {
+      if (unsubscribeEmail) setFormData(prev => ({ ...prev, email: unsubscribeEmail }));
+      setCurrentView('unsubscribe');
+      setShowWelcome(false);
+      window.dispatchToken = unsubscribeToken;
+      return;
+    }
+
+    // Default view state if no active route
+    if (!viewParam && !statusParam) {
+      setCurrentView('home');
+      // Only hide welcome loader if this was triggered by a back button (popstate)
+      // On fresh load, we want the Welcome animation to run.
+      if (isPopState) setShowWelcome(false);
+      return;
+    }
+
+    if (viewParam === 'dashboard') {
+      const nameParam = params.get('name');
+      const emailParam = params.get('email');
+      if (nameParam) setUserName(nameParam);
+      if (emailParam) setFormData(prev => ({ ...prev, email: emailParam }));
+      setCurrentView('dashboard');
+      setShowWelcome(false);
+    } else if (viewParam === 'feedback' || statusParam) {
+      setCurrentView('feedback');
+      setShowWelcome(false);
+    } else if (viewParam === 'latest') {
+      setCurrentView('latest');
+      setShowWelcome(false);
+    } else if (viewParam === 'archive') {
+      setCurrentView('archive');
+      setShowWelcome(false);
+    } else if (viewParam === 'issue') {
+      if (idParam) setSelectedIssueId(idParam);
+      setCurrentView('issue');
+      setShowWelcome(false);
+    } else if (viewParam === 'getcopy') {
+      setCurrentView('getcopy');
+      setShowWelcome(false);
+    } else if (viewParam === 'commander') {
+      setCurrentView('commander');
+      setShowWelcome(false);
+    } else if (viewParam === 'home') {
+      setCurrentView('home');
+    }
+  };
+
+  const setView = (view, params = {}) => {
+    const url = new URL(window.location);
+    // Clear all existing specific view params first
+    url.searchParams.delete('view');
+    url.searchParams.delete('id');
+    url.searchParams.delete('status');
+    url.searchParams.delete('verified');
+    url.searchParams.delete('unsubscribe');
+
+    if (view !== 'home') {
+      url.searchParams.set('view', view);
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
+      });
+    }
+
+    window.history.pushState({}, '', url);
+    setCurrentView(view);
+    if (view !== 'home') setShowWelcome(false);
+  };
+
   useEffect(() => {
     // Get user timezone and update form data
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -52,7 +142,15 @@ function App() {
       timezone: userTimezone
     }));
     
-    // Add network status listener
+    // Initial sync
+    syncViewWithUrl();
+
+    // Handle back/forward buttons
+    const handlePopState = () => {
+      syncViewWithUrl(true);
+    };
+
+    // Add network status listeners
     const handleOnline = () => {
       if (apiError && apiError.includes('No internet connection')) {
         setApiError('');
@@ -66,68 +164,12 @@ function App() {
       }
     };
 
-    // Check for query parameters (Routing & Notifications)
-    const params = new URLSearchParams(window.location.search);
-    const unsubscribeEmail = params.get('email');
-    const unsubscribeToken = params.get('token');
-    const isUnsubscribeAction = params.get('unsubscribe') === 'true';
-    const viewParam = params.get('view');
-    const verifiedStatus = params.get('verified');
-    const verifyError = params.get('error');
-    const refParam = params.get('ref');
-
-    if (refParam) {
-        setReferrerToken(refParam);
-    }
-
-    if (verifiedStatus) {
-      setCurrentView('verification');
-      setShowWelcome(false);
-    }
-
-    if (viewParam === 'dashboard') {
-      const nameParam = params.get('name');
-      const emailParam = params.get('email');
-      if (nameParam) setUserName(nameParam);
-      if (emailParam) {
-        setFormData(prev => ({ ...prev, email: emailParam }));
-      }
-      setCurrentView('dashboard');
-      setShowWelcome(false); 
-    } else if (viewParam === 'feedback' || params.get('status')) {
-      setCurrentView('feedback');
-      setShowWelcome(false);
-    } else if (viewParam === 'latest') {
-      setCurrentView('latest');
-      setShowWelcome(false);
-    } else if (viewParam === 'archive') {
-      setCurrentView('archive');
-      setShowWelcome(false);
-    } else if (viewParam === 'issue') {
-      const id = params.get('id');
-      if (id) setSelectedIssueId(id);
-      setCurrentView('issue');
-      setShowWelcome(false);
-    } else if (viewParam === 'getcopy') {
-      setCurrentView('getcopy');
-      setShowWelcome(false);
-    } else if (viewParam === 'commander') {
-      setCurrentView('commander');
-      setShowWelcome(false);
-    }
-
-    if (isUnsubscribeAction && (unsubscribeEmail || unsubscribeToken)) {
-      if (unsubscribeEmail) setFormData(prev => ({ ...prev, email: unsubscribeEmail }));
-      setCurrentView('unsubscribe');
-      setShowWelcome(false);
-      // Pass token to unsubscribe view if needed
-      window.dispatchToken = unsubscribeToken; 
-    }
-    
+    window.addEventListener('popstate', handlePopState);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
     return () => {
+      window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -288,27 +330,26 @@ function App() {
 
   const renderView = () => {
     if (showWelcome) return <Welcome onWelcomeComplete={handleWelcomeComplete} />;
-    if (currentView === 'dashboard') return <Dashboard name={userName} email={formData.email} setView={setCurrentView} />;
-    if (currentView === 'feedback') return <Feedback setView={setCurrentView} />;
-    if (currentView === 'latest') return <LatestIssue setView={setCurrentView} />;
-    if (currentView === 'archive') return <ArchiveExplorer setView={setCurrentView} setSelectedIssueId={setSelectedIssueId} email={formData.email} />;
-    if (currentView === 'issue') return <LatestIssue issueId={selectedIssueId} setView={setCurrentView} />;
-    if (currentView === 'getcopy') return <CopyPage setView={setCurrentView} />;
+    if (currentView === 'dashboard') return <Dashboard name={userName} email={formData.email} setView={setView} />;
+    if (currentView === 'feedback') return <Feedback setView={setView} />;
+    if (currentView === 'latest') return <LatestIssue setView={setView} />;
+    if (currentView === 'archive') return <ArchiveExplorer setView={setView} setSelectedIssueId={setSelectedIssueId} email={formData.email} />;
+    if (currentView === 'issue') return <LatestIssue issueId={selectedIssueId} setView={setView} />;
+    if (currentView === 'getcopy') return <CopyPage setView={setView} />;
     if (currentView === 'unsubscribe') return (
       <Unsubscribe 
         email={formData.email} 
         token={window.dispatchToken}
-        setView={setCurrentView} 
+        setView={setView} 
         onUnsubscribe={() => {
           setUnsubscribed(true);
-          setCurrentView('home');
-          window.history.replaceState({}, document.title, window.location.pathname);
+          setView('home');
         }} 
       />
     );
-    if (currentView === 'commander') return <Commander setView={setCurrentView} />;
-    if (currentView === 'omegawall') return <OmegaWall setView={setCurrentView} email={formData.email} />;
-    if (currentView === 'verification') return <VerificationStatus setView={setCurrentView} setUserName={setUserName} setFormData={setFormData} />;
+    if (currentView === 'commander') return <Commander setView={setView} />;
+    if (currentView === 'omegawall') return <OmegaWall setView={setView} email={formData.email} />;
+    if (currentView === 'verification') return <VerificationStatus setView={setView} setUserName={setUserName} setFormData={setFormData} />;
     
     return (
       <div className="newsletter-container">
@@ -400,7 +441,7 @@ function App() {
                   
                   {isAlreadySubscribed && (
                     <button 
-                      onClick={() => setCurrentView('dashboard')}
+                      onClick={() => setView('dashboard')}
                       className="submit-btn"
                       style={{ marginTop: '1.5rem', width: 'auto', padding: '10px 25px', fontSize: '0.9rem' }}
                     >
@@ -492,7 +533,7 @@ function App() {
               <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px' }}>
                 <button 
                   type="button"
-                  onClick={() => setCurrentView('latest')}
+                  onClick={() => setView('latest')}
                   className="secondary-btn"
                   style={{
                     flex: 1,
@@ -521,7 +562,7 @@ function App() {
                 </button>
                 <button 
                   type="button"
-                  onClick={() => setCurrentView('archive')}
+                  onClick={() => setView('archive')}
                   className="secondary-btn"
                   style={{
                     flex: 1,
